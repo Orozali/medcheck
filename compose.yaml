@@ -1,9 +1,27 @@
-services:
-  postgres:
-    image: 'postgres:latest'
-    environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
-    ports:
-      - '5432'
+#version: "3.9"
+#services:
+#  backend:
+#    image: 'image'
+#    container_name: medcheck
+#    restart: always
+#    ports:
+#      - "80:2024"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: main
+#      SERVER_PORT: 2024
+#      POSTGRES_DB: jdbc:postgresql://database:5432/medcheck
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: Orozali2003
+#  database:
+#    image: postgres:15
+#    restart: always
+#    container_name: database
+#    ports:
+#      - "5432:5433"
+#    environment:
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: Orozali2003
+#    volumes:
+#      - db_data:/var/lib/postgresql/data
+#volumes:
+#  db_data:
