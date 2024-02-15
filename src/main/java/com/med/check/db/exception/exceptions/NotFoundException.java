@@ -1,4 +1,4 @@
-package com.med.check.db.exception;
+package com.med.check.db.exception.exceptions;
 
 import org.aspectj.weaver.ast.Not;
 
