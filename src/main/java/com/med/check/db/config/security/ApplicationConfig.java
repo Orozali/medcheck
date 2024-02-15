@@ -1,6 +1,6 @@
 package com.med.check.db.config.security;
 
-import com.med.check.db.exception.NotFoundException;
+import com.med.check.db.exception.exceptions.NotFoundException;
 import com.med.check.db.repository.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
