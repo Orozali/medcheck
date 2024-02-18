@@ -29,6 +29,7 @@ public class UserInfo implements UserDetails {
     private Role role;
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "userInfo",orphanRemoval = true)
     private User user;
+    private String resetPasswordToken;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
