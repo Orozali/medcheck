@@ -19,6 +19,7 @@
 #    ports:
 #      - "5432:5433"
 #    environment:
+#      POSTGRES_DB: medcheck
 #      POSTGRES_USER: postgres
 #      POSTGRES_PASSWORD: Orozali2003
 #    volumes:
