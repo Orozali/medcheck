@@ -27,6 +27,6 @@ public class Results {
     private String resultFile;
     private String answer;
     @ManyToOne(cascade = {REFRESH, PERSIST, MERGE, DETACH})
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "patient_id")
+    private Patient patient;
 }

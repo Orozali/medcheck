@@ -1,9 +1,9 @@
 package com.med.check.db.repository;
 
-import com.med.check.db.model.Patient;
+import com.med.check.db.model.Doctor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserRepository extends JpaRepository<Patient, Long> {
+public interface DoctorRepository extends JpaRepository<Doctor, Long> {
 }

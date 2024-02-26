@@ -1,19 +1,19 @@
 #version: "3.9"
 #services:
 #  backend:
-#    image: 'image'
-#    container_name: medcheck
+#    image: orozali/medcheck
+#    container_name: backend
 #    restart: always
 #    ports:
 #      - "80:2024"
 #    environment:
 #      SPRING_PROFILES_ACTIVE: main
 #      SERVER_PORT: 2024
-#      POSTGRES_DB: jdbc:postgresql://database:5432/medcheck
+#      POSTGRES_DB: medcheck
 #      POSTGRES_USER: postgres
 #      POSTGRES_PASSWORD: Orozali2003
 #  database:
-#    image: postgres:15
+#    image: orozali/postgres
 #    restart: always
 #    container_name: database
 #    ports:

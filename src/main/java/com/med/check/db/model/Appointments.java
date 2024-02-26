@@ -10,13 +10,13 @@ import static jakarta.persistence.CascadeType.*;
 import static jakarta.persistence.CascadeType.DETACH;
 
 @Entity
-@Table(name = "notes")
+@Table(name = "appointments")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Notes {
+public class Appointments {
     @Id
     @SequenceGenerator(name = "note_gen", sequenceName = "note_seq", allocationSize = 1, initialValue = 10)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "note_gen")
@@ -27,8 +27,8 @@ public class Notes {
     @Enumerated(EnumType.STRING)
     private Status status;
     @ManyToOne(cascade = {REFRESH, PERSIST, MERGE, DETACH})
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "patient_id")
+    private Patient patient;
     @ManyToOne(cascade = {REFRESH, PERSIST, MERGE, DETACH})
     @JoinColumn(name = "doctor_id")
     private Doctor doctor;

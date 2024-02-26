@@ -5,8 +5,11 @@ import lombok.*;
 
 import java.util.List;
 
+import static jakarta.persistence.CascadeType.*;
+import static jakarta.persistence.CascadeType.DETACH;
+
 @Entity
-@Table(name = "doctor")
+@Table(name = "doctors")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -22,10 +25,14 @@ public class Doctor {
     private String lastName;
     @Column(length = 10000)
     private String image;
-    private String department;
-    private String post;
+    private String position;
     private String description;
     private Boolean isActive;
     @OneToMany(mappedBy = "doctor", orphanRemoval = true)
-    private List<Notes> notes;
+    private List<Appointments> appointments;
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "doctor",orphanRemoval = true)
+    private Schedule schedule;
+    @ManyToOne(cascade = {REFRESH, PERSIST, MERGE, DETACH})
+    @JoinColumn(name = "service_id")
+    private Service service;
 }
