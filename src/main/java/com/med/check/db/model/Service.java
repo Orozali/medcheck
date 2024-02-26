@@ -3,6 +3,8 @@ package com.med.check.db.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import javax.print.Doc;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -20,5 +22,15 @@ public class Service {
     private Long id;
     private String name;
     @OneToMany(mappedBy = "service", orphanRemoval = true)
-    private List<Notes> notes;
+    private List<Appointments> appointments;
+    @OneToMany(mappedBy = "service")
+    private List<Doctor> doctors;
+
+    public void addDoctor(Doctor doctor){
+        if (doctors == null){
+            doctors = new ArrayList<>();
+            doctors.add(doctor);
+        }
+        doctors.add(doctor);
+    }
 }

@@ -34,4 +34,7 @@ public class Schedule {
     private Service service;
     @OneToMany(mappedBy = "schedule", orphanRemoval = true)
     private List<ScheduleDateAndTime> scheduleDateAndTimes;
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "doctor_id")
+    private Doctor doctor;
 }

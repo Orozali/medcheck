@@ -2,10 +2,10 @@
 #services:
 #  backend:
 #    image: orozali/medcheck
-#    container_name: med-check
+#    container_name: backend
+#    restart: always
 #    ports:
 #      - "80:2024"
-#    restart: always
 #    environment:
 #      SPRING_PROFILES_ACTIVE: main
 #      SERVER_PORT: 2024
@@ -26,4 +26,3 @@
 #      - db_data:/var/lib/postgresql/data
 #volumes:
 #  db_data:
-#
