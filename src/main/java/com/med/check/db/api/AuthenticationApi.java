@@ -40,7 +40,7 @@ public class AuthenticationApi {
 
     @Operation(summary = "Forget password method", description = "This method is for sending user url to change his password!")
     @PostMapping("/forget-password")
-    public SimpleResponse forgetPassword(@RequestBody ForgetPasswordRequest request){
+    public SimpleResponse forgetPassword(@RequestBody @Valid ForgetPasswordRequest request){
         return authenticationService.sendEmail(request);
     }
 
@@ -55,5 +55,4 @@ public class AuthenticationApi {
     public AuthenticationResponse resetPassword(@RequestParam String email, @RequestBody @Valid ResetPasswordRequest request){
         return authenticationService.resetPassword(request.newPassword(), email);
     }
-
 }
