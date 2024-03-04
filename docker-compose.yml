@@ -1,27 +1,22 @@
-#version: "3.9"
+#version: '3.8'
+#
 #services:
-#  backend:
-#    image: orozali/medcheck
-#    container_name: backend
-#    restart: always
-#    ports:
-#      - "80:2024"
+#  postgres:
+#    image: orozali/postgres
+#    build:
+#      context: .
+#      dockerfile: Dockerfile.postgres
 #    environment:
-#      SPRING_PROFILES_ACTIVE: main
-#      SERVER_PORT: 2024
 #      POSTGRES_DB: medcheck
 #      POSTGRES_USER: postgres
 #      POSTGRES_PASSWORD: Orozali2003
-#  database:
-#    image: orozali/postgres
-#    restart: always
-#    container_name: database
+#
+#  spring-app:
+#    image: orozali/spring-app
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    depends_on:
+#      - postgres
 #    ports:
-#      - "5432:5433"
-#    environment:
-#      POSTGRES_USER: postgres
-#      POSTGRES_PASSWORD: Orozali2003
-#    volumes:
-#      - db_data:/var/lib/postgresql/data
-#volumes:
-#  db_data:
+#      - "8080:8080"

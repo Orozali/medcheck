@@ -8,4 +8,4 @@
 #WORKDIR /app
 #COPY --from=build /app/target/check-0.0.1-SNAPSHOT.jar .
 #CMD ["java", "-jar", "check-0.0.1-SNAPSHOT.jar"]
-#EXPOSE 2024
+#EXPOSE 8080

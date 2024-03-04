@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 
 import static jakarta.persistence.CascadeType.*;
 import static jakarta.persistence.CascadeType.DETACH;
@@ -21,8 +24,10 @@ public class ScheduleDateAndTime {
             allocationSize = 1, initialValue = 10)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "schedule_date_time_gen")
     private Long id;
-    private LocalDate timeFrom;
-    private LocalDate timeTo;
+    @Column(columnDefinition = "time")
+    private LocalTime timeFrom;
+    @Column(columnDefinition = "time")
+    private LocalTime timeTo;
     private LocalDate date;
     private Boolean isBusy;
     @ManyToOne(cascade = {REFRESH, PERSIST, MERGE, DETACH})
