@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "application")
@@ -13,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Appication {
+public class Application {
     @Id
     @SequenceGenerator(name = "doctor_gen", sequenceName = "doctor_seq",
             allocationSize = 1)

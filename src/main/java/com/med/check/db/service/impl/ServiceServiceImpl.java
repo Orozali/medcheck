@@ -1,9 +1,7 @@
 package com.med.check.db.service.impl;
 
-import com.med.check.db.dto.response.ServiceDoctorResponse;
 import com.med.check.db.dto.response.ServiceResponse;
 import com.med.check.db.dto.response.SimpleResponse;
-import com.med.check.db.exception.exceptions.NotFoundException;
 import com.med.check.db.repository.ServiceRepository;
 import com.med.check.db.service.ServiceService;
 import lombok.RequiredArgsConstructor;
