@@ -11,10 +11,13 @@ import com.med.check.db.exception.exceptions.BadRequestException;
 import com.med.check.db.exception.exceptions.MessageSendingException;
 import com.med.check.db.exception.exceptions.NotFoundException;
 import com.med.check.db.model.Patient;
+import com.med.check.db.model.Token;
 import com.med.check.db.model.User;
 import com.med.check.db.model.enums.Role;
+import com.med.check.db.model.enums.TokenType;
+import com.med.check.db.repository.TokenRepository;
 import com.med.check.db.repository.UserInfoRepository;
-import com.med.check.db.repository.UserRepository;
+import com.med.check.db.repository.PatientRepository;
 import com.med.check.db.service.AuthenticationService;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -24,6 +27,8 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -35,10 +40,8 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.security.SecureRandom;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -46,29 +49,36 @@ import java.util.UUID;
 @Transactional
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-    private final UserRepository userRepository;
+    private final PatientRepository patientRepository;
     private final UserInfoRepository userInfoRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final JavaMailSender javaMailSender;
     private final Configuration config;
+    private final MessageSource messageSource;
+    private final TokenRepository tokenRepository;
+
+    private static final int TOKEN_LENGTH = 6;
+    private static final String DIGIT_CHARACTERS = "0123456789";
 
     @Override
     public AuthenticationResponse signUp(RegisterRequest request) {
         Optional<User> userInfo = userInfoRepository.findByEmail(request.email());
         if(userInfo.isPresent()){
             log.error(String.format("Пользователь с адресом электронной почты %s уже существует", request.email()));
-            throw new AlreadyExistException(String.format("Пользователь с адресом электронной почты %s уже существует!", request.email()));
+            throw new AlreadyExistException(messageSource.getMessage("exception.alreadyExist",
+                    new Object[]{request.email()}, LocaleContextHolder.getLocale()));
         }
         String emailName = request.email().split("@")[0];
-        if(request.password().equals(emailName)){
-            throw new BadRequestException("Создайте более надежный пароль!");
+        if(request.password().toLowerCase().equals(emailName)){
+            throw new BadRequestException(messageSource.getMessage("exception.badRequest.password",
+                    null, LocaleContextHolder.getLocale()));
         }
         User info = User.builder()
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
-                .role(Role.USER)
+                .roles(Role.USER)
                 .build();
 
         Patient patient = Patient.builder()
@@ -77,13 +87,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .telNumber(request.telNumber())
                 .user(info)
                 .build();
-        userRepository.save(patient);
+        patientRepository.save(patient);
+        String jwtToken = jwtService.generateToken(info);
+        saveToken(info, jwtToken);
         log.info(String.format("Пользователь %s успешно сохранен!", info.getEmail()));
-        String token = jwtService.generateToken(info);
         return AuthenticationResponse.builder()
                 .email(info.getEmail())
-                .role(info.getRole())
-                .token(token)
+                .roles(info.getRoles())
+                .token(jwtToken)
                 .build();
     }
 
@@ -92,12 +103,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = userInfoRepository.findByEmail(request.email())
                 .orElseThrow(() ->  {
                     log.error(String.format("Пользователь с адресом электронной почты %s не существует", request.email()));
-                    return new NotFoundException(String.format("Пользователь с адресом электронной почты %s не существует!", request.email()));
+                    return new NotFoundException(messageSource.getMessage("exception.notFound",
+                            new Object[]{request.email()}, LocaleContextHolder.getLocale()));
                 } );
 
         if(!passwordEncoder.matches(request.password(), user.getPassword())){
-            log.error("Пароль не подходит");
-            throw new BadRequestException("Пароль не подходит");
+            log.error("Неверный пароль или логин!");
+            throw new BadRequestException(messageSource.getMessage("exception.badRequest.password.match",
+                    null, LocaleContextHolder.getLocale()));
         }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -107,11 +120,29 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         );
         log.info(String.format("Пользователь %s успешно аутентифицирован", user.getEmail()));
         String token = jwtService.generateToken(user);
+        var userTokens = tokenRepository.findAllValidTokensByUser(user.getId());
+        userTokens.forEach(item -> {
+            item.setExpired(true);
+            item.setRevoked(true);
+        });
+        tokenRepository.saveAll(userTokens);
+        saveToken(user, token);
         return AuthenticationResponse.builder()
                 .token(token)
-                .role(user.getRole())
+                .roles(user.getRoles())
                 .email(user.getEmail())
                 .build();
+    }
+
+    private void saveToken(User info, String jwtToken) {
+        var token = Token.builder()
+                .token(jwtToken)
+                .tokenType(TokenType.BEARER)
+                .revoked(false)
+                .expired(false)
+                .user(info)
+                .build();
+        tokenRepository.save(token);
     }
 
 
@@ -120,9 +151,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = userInfoRepository.findByEmail(request.email())
                 .orElseThrow(()->{
                     log.error(String.format("Пользователь с адресом электронной почты %s не зарегистрирован", request.email()));
-                    return new NotFoundException(String.format("Пользователь с адресом электронной почты %s не зарегистрирован!", request.email()));
+                    return new NotFoundException(messageSource.getMessage("exception.notFound",
+                            new Object[]{request.email()}, LocaleContextHolder.getLocale()));
                 } );
-        String uniqueCode = UUID.randomUUID().toString();
+        String uniqueCode = generateToken();
         user.setResetPasswordToken(uniqueCode);
 
 
@@ -143,13 +175,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             javaMailSender.send(message);
         } catch (IOException | TemplateException | MessagingException e) {
             log.error("Ошибка при отправке сообщения!");
-            throw new MessageSendingException("Ошибка при отправке сообщения!");
+            throw new MessageSendingException(messageSource.getMessage("exception.messageSending",
+                    null, LocaleContextHolder.getLocale()));
         }
 
         log.info("Сообщение успешно отправлена");
         return SimpleResponse.builder()
                 .httpStatus(HttpStatus.OK)
-                .message("Мы отправили вам по Email ссылку для сброса пароля!")
+                .message(messageSource.getMessage("message.send", null, LocaleContextHolder.getLocale()))
                 .build();
     }
 
@@ -157,8 +190,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public SimpleResponse confirm(String token) {
         User user = userInfoRepository.findByResetPasswordToken(token)
                 .orElseThrow(()->{
-                    log.error("Вы ввели неправильный код");
-                    return new NotFoundException("Вы ввели неправильный код");
+                    log.error("Вы ввели неправильный токен");
+                    return new NotFoundException(messageSource.getMessage("exception.notFound.token",
+                            null, LocaleContextHolder.getLocale()));
                 } );
         return SimpleResponse.builder()
                 .httpStatus(HttpStatus.OK)
@@ -171,7 +205,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = userInfoRepository.findByEmail(email)
                 .orElseThrow(()->{
                     log.error("Пользователь не существует");
-                    return new NotFoundException("Пользователь не существует");
+                    return new NotFoundException(messageSource.getMessage("exception.notFound",
+                            new Object[]{email}, LocaleContextHolder.getLocale()));
                 } );
         user.setResetPasswordToken(null);
         user.setPassword(passwordEncoder.encode(newPassword));
@@ -179,7 +214,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return AuthenticationResponse.builder()
                 .email(user.getEmail())
                 .token(jwtService.generateToken(user))
-                .role(Role.USER)
+                .roles(user.getRoles())
                 .build();
+    }
+
+    private static String generateToken() {
+        SecureRandom random = new SecureRandom();
+        StringBuilder token = new StringBuilder(TOKEN_LENGTH);
+
+        for (int i = 0; i < TOKEN_LENGTH; i++) {
+            int randomIndex = random.nextInt(DIGIT_CHARACTERS.length());
+            char randomDigit = DIGIT_CHARACTERS.charAt(randomIndex);
+            token.append(randomDigit);
+        }
+
+        return token.toString();
     }
 }

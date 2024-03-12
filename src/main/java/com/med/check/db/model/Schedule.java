@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +21,7 @@ import static jakarta.persistence.CascadeType.DETACH;
 public class Schedule {
     @Id
     @SequenceGenerator(name = "schedule_gen", sequenceName = "schedule_seq",
-            allocationSize = 1, initialValue = 10)
+            allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "schedule_gen")
     private Long id;
     private LocalDate dateOfStart;

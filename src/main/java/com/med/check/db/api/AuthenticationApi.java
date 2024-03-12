@@ -6,20 +6,16 @@ import com.med.check.db.dto.request.RegisterRequest;
 import com.med.check.db.dto.request.ResetPasswordRequest;
 import com.med.check.db.dto.response.AuthenticationResponse;
 import com.med.check.db.dto.response.SimpleResponse;
-import com.med.check.db.exception.exceptionResponse.ExceptionResponse;
-import com.med.check.db.exception.exceptions.BadCredentialException;
 import com.med.check.db.service.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @Tag(name = "Authentication API")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class AuthenticationApi {

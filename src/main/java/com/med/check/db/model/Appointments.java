@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import static jakarta.persistence.CascadeType.*;
 import static jakarta.persistence.CascadeType.DETACH;
@@ -19,7 +18,7 @@ import static jakarta.persistence.CascadeType.DETACH;
 @Builder
 public class Appointments {
     @Id
-    @SequenceGenerator(name = "note_gen", sequenceName = "note_seq", allocationSize = 1, initialValue = 10)
+    @SequenceGenerator(name = "note_gen", sequenceName = "note_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "note_gen")
     private Long id;
     private String fullName;
