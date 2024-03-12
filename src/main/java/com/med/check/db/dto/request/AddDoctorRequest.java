@@ -4,15 +4,15 @@ import jakarta.validation.constraints.NotBlank;
 
 public record AddDoctorRequest(
         String image,
-        @NotBlank(message = "Имя не должна быть пустой!")
+        @NotBlank(message = "validation.name")
         String name,
-        @NotBlank(message = "Фамилия не должна быть пустой!")
+        @NotBlank(message = "validation.surName")
         String surname,
-        @NotBlank(message = "Отделение не должна быть пустой!")
+        @NotBlank(message = "validation.service")
         String service,
-        @NotBlank(message = "Должность не должна быть пустой!")
+        @NotBlank(message = "validation.position")
         String position,
-        @NotBlank(message = "Описание не должна быть пустой!")
+        @NotBlank(message = "validation.description")
         String description
 ) {
 }

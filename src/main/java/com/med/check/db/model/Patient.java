@@ -17,7 +17,7 @@ import static jakarta.persistence.CascadeType.*;
 public class Patient {
     @Id
     @SequenceGenerator(name = "user_gen", sequenceName = "user_seq",
-                        allocationSize = 1, initialValue = 10)
+                        allocationSize = 1)
     @GeneratedValue(generator = "user_gen", strategy = GenerationType.SEQUENCE)
     private Long id;
     private String firstName;

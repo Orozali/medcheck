@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class Appication {
     @Id
     @SequenceGenerator(name = "doctor_gen", sequenceName = "doctor_seq",
-            allocationSize = 1, initialValue = 10)
+            allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "doctor_gen")
     private Long id;
     private String name;

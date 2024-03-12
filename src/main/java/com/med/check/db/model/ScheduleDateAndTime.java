@@ -21,7 +21,7 @@ import static jakarta.persistence.CascadeType.DETACH;
 public class ScheduleDateAndTime {
     @Id
     @SequenceGenerator(name = "schedule_date_time_gen", sequenceName = "schedule_date_time_seq",
-            allocationSize = 1, initialValue = 10)
+            allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "schedule_date_time_gen")
     private Long id;
     @Column(columnDefinition = "time")

@@ -1,22 +1,21 @@
-#version: '3.8'
-#
-#services:
-#  postgres:
-#    image: orozali/postgres
-#    build:
-#      context: .
-#      dockerfile: Dockerfile.postgres
-#    environment:
-#      POSTGRES_DB: medcheck
-#      POSTGRES_USER: postgres
-#      POSTGRES_PASSWORD: Orozali2003
-#
-#  spring-app:
-#    image: orozali/spring-app
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    depends_on:
-#      - postgres
-#    ports:
-#      - "8080:8080"
+version: '3.8'
+
+services:
+  spring-app:
+    image: orozali/spring-app:1.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+  postgres:
+    image: postgres:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    environment:
+      POSTGRES_DB: medcheck
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Orozali2003

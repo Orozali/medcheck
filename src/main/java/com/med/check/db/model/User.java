@@ -10,6 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
+import static jakarta.persistence.CascadeType.ALL;
+
 @Entity
 @Table(name = "user_info")
 @Getter
@@ -20,20 +22,20 @@ import java.util.List;
 public class User implements UserDetails {
     @Id
     @SequenceGenerator(name = "user_info_gen", sequenceName = "user_info_seq",
-                        allocationSize = 1, initialValue = 10)
+                        allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_info_gen")
     private Long id;
     private String email;
     private String password;
-    @Enumerated(EnumType.STRING)
-    private Role role;
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user",orphanRemoval = true)
-    private Patient patient;
     private String resetPasswordToken;
+    @Enumerated(EnumType.STRING)
+    private Role roles;
+    @OneToMany(mappedBy = "user")
+    private List<Token> tokens;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
+        return this.roles.getAuthorities();
     }
 
     @Override

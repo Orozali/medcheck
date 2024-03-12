@@ -19,7 +19,7 @@ import static jakarta.persistence.CascadeType.DETACH;
 public class Results {
     @Id
     @SequenceGenerator(name = "results_gen", sequenceName = "results_seq",
-                        allocationSize = 1, initialValue = 10)
+                        allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "results_gen")
     private Long id;
     private String orderNumber;
