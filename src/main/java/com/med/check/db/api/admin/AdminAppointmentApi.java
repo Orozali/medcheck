@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/admin/appointment")
 @RequiredArgsConstructor
-@Tag(name = "Admin API")
+@Tag(name = "Admin Appointment API")
 @CrossOrigin(origins = "*", maxAge = 3600)
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminAppointmentApi {
@@ -29,20 +29,17 @@ public class AdminAppointmentApi {
     private final ServiceService service;
     @GetMapping("/services")
     @Operation(summary = "Get Service method", description = "This method is for getting Services!")
-    @PreAuthorize("hasAuthority('admin:read')")
     public List<ServiceResponse> getService(){
         return service.getService();
     }
 
     @PostMapping("/doctor/{service_id}")
     @Operation(summary = "Get Doctor by service id", description = "This method gets doctors by service id!")
-    @PreAuthorize("hasAnyAuthority('admin:read','admin:update')")
     public List<DoctorResponse> getDoctorsByServiceId(@PathVariable("service_id") Long service_id) {
         return doctorService.getDoctorsByServiceId(service_id);
     }
     @PostMapping("/add-appointment")
     @Operation(summary = "Add appointment method", description = "This method is for adding appointments to doctors!")
-    @PreAuthorize("hasAuthority('admin:create')")
     public SimpleResponse addAppointment(@RequestBody @Valid ScheduleRequest request){
         return scheduleService.saveSchedule(request);
     }
