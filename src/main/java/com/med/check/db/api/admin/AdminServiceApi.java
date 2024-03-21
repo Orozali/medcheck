@@ -7,8 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.annotation.Target;
-
 @RestController
 @RequestMapping("/api/v1/admin/service")
 @CrossOrigin(origins = "*", maxAge = 3000)
