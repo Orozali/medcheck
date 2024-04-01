@@ -24,6 +24,6 @@ public class Reviews {
     @JoinColumn(name = "doctor_id")
     private Doctor doctor;
     @ManyToOne(cascade = {REFRESH, PERSIST, MERGE, DETACH})
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "patient_id")
     private Patient patient;
 }

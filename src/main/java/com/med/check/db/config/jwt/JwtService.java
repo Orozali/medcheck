@@ -15,15 +15,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-/**
- * @author altynbek
- * @created at 02.04.2023 23:55
- */
 @Service
 public class JwtService {
     @Value("${spring.jwt.secret-key}")
     private String SECRET_KEY;
-
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
