@@ -35,4 +35,6 @@ public class Doctor {
     @ManyToOne(cascade = {REFRESH, PERSIST, MERGE, DETACH})
     @JoinColumn(name = "service_id")
     private Service service;
+    @OneToMany(mappedBy = "doctor", orphanRemoval = true)
+    private List<Reviews> reviews;
 }

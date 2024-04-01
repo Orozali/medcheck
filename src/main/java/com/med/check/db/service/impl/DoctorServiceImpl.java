@@ -1,12 +1,10 @@
 package com.med.check.db.service.impl;
 
 import com.med.check.db.dto.request.AddDoctorRequest;
-import com.med.check.db.dto.response.DoctorByIdResponse;
-import com.med.check.db.dto.response.DoctorResponse;
-import com.med.check.db.dto.response.GetDoctorsResponse;
-import com.med.check.db.dto.response.SimpleResponse;
+import com.med.check.db.dto.response.*;
 import com.med.check.db.exception.exceptions.NotFoundException;
 import com.med.check.db.model.Doctor;
+import com.med.check.db.model.Reviews;
 import com.med.check.db.model.Schedule;
 import com.med.check.db.repository.DoctorRepository;
 import com.med.check.db.repository.ServiceRepository;
@@ -20,6 +18,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -134,6 +134,32 @@ public class DoctorServiceImpl implements DoctorService {
                 resultSet.getString("surName"),
                 resultSet.getString("image")
         ), serviceId);
+    }
+
+    @Override
+    public List<DoctorReviewResponse> getDoctorsByReview() {
+        List<DoctorReviewResponse> response = new ArrayList<>();
+        List<Doctor> doctors = doctorRepository.findAll();
+        for(Doctor doctor: doctors){
+            int count = 0;
+            List<Reviews> reviews = doctor.getReviews();
+            DoctorReviewResponse doctorReviewResponse = new DoctorReviewResponse();
+            for(Reviews review: reviews){
+                count+=review.getGrade();
+            }
+            if(!reviews.isEmpty()){
+                count = count/reviews.size();
+            }
+            doctorReviewResponse.setDoctor_id(doctor.getId());
+            doctorReviewResponse.setName(doctor.getFirstName());
+            doctorReviewResponse.setSurName(doctor.getLastName());
+            doctorReviewResponse.setPosition(doctor.getPosition());
+            doctorReviewResponse.setImage(doctor.getImage());
+            doctorReviewResponse.setGrade(count);
+            response.add(doctorReviewResponse);
+        }
+        response.sort(Comparator.comparingInt(DoctorReviewResponse::getGrade).reversed());
+        return response;
     }
 }
 

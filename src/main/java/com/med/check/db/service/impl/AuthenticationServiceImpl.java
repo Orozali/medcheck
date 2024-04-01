@@ -11,11 +11,8 @@ import com.med.check.db.exception.exceptions.BadRequestException;
 import com.med.check.db.exception.exceptions.MessageSendingException;
 import com.med.check.db.exception.exceptions.NotFoundException;
 import com.med.check.db.model.Patient;
-import com.med.check.db.model.Token;
 import com.med.check.db.model.User;
 import com.med.check.db.model.enums.Role;
-import com.med.check.db.model.enums.TokenType;
-import com.med.check.db.repository.TokenRepository;
 import com.med.check.db.repository.UserInfoRepository;
 import com.med.check.db.repository.PatientRepository;
 import com.med.check.db.service.AuthenticationService;
@@ -57,7 +54,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JavaMailSender javaMailSender;
     private final Configuration config;
     private final MessageSource messageSource;
-    private final TokenRepository tokenRepository;
 
     private static final int TOKEN_LENGTH = 6;
     private static final String DIGIT_CHARACTERS = "0123456789";
@@ -78,7 +74,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User info = User.builder()
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
-                .roles(Role.USER)
+                .roles(Role.PATIENT)
                 .build();
 
         Patient patient = Patient.builder()
@@ -89,7 +85,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .build();
         patientRepository.save(patient);
         String jwtToken = jwtService.generateToken(info);
-        saveToken(info, jwtToken);
         log.info(String.format("Пользователь %s успешно сохранен!", info.getEmail()));
         return AuthenticationResponse.builder()
                 .email(info.getEmail())
@@ -120,31 +115,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         );
         log.info(String.format("Пользователь %s успешно аутентифицирован", user.getEmail()));
         String token = jwtService.generateToken(user);
-        var userTokens = tokenRepository.findAllValidTokensByUser(user.getId());
-        userTokens.forEach(item -> {
-            item.setExpired(true);
-            item.setRevoked(true);
-        });
-        tokenRepository.saveAll(userTokens);
-        saveToken(user, token);
         return AuthenticationResponse.builder()
                 .token(token)
                 .roles(user.getRoles())
                 .email(user.getEmail())
                 .build();
     }
-
-    private void saveToken(User info, String jwtToken) {
-        var token = Token.builder()
-                .token(jwtToken)
-                .tokenType(TokenType.BEARER)
-                .revoked(false)
-                .expired(false)
-                .user(info)
-                .build();
-        tokenRepository.save(token);
-    }
-
 
     @Override
     public SimpleResponse sendEmail(ForgetPasswordRequest request) {
