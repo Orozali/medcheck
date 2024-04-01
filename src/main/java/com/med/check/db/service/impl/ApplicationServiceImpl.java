@@ -6,7 +6,6 @@ import com.med.check.db.model.Application;
 import com.med.check.db.repository.ApplicationRepository;
 import com.med.check.db.service.ApplicationService;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
