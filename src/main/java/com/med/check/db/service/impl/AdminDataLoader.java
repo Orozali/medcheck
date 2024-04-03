@@ -21,16 +21,16 @@ public class AdminDataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (userInfoRepository.findByEmail("admin@gmail.com").isEmpty()) {
-            User admin = User.builder()
-                    .email("admin@gmail.com")
-                    .password(passwordEncoder.encode("Admin2024"))
-                    .roles(ADMIN)
-                    .build();
-            userInfoRepository.save(admin);
-            System.out.println("ADMIN TOKEN: "+jwtService.generateToken(admin));
-        } else {
-            System.out.println("ADMIN TOKEN: "+jwtService.generateToken(userInfoRepository.findByEmail("admin@gmail.com").get()));
-        }
+//        if (userInfoRepository.findByEmail("admin@gmail.com").isEmpty()) {
+//            User admin = User.builder()
+//                    .email("admin@gmail.com")
+//                    .password(passwordEncoder.encode("Admin2024"))
+//                    .roles(ADMIN)
+//                    .build();
+//            userInfoRepository.save(admin);
+//            System.out.println("ADMIN TOKEN: "+jwtService.generateToken(admin));
+//        } else {
+//            System.out.println("ADMIN TOKEN: "+jwtService.generateToken(userInfoRepository.findByEmail("admin@gmail.com").get()));
+//        }
     }
 }

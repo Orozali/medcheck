@@ -1,14 +1,15 @@
 package com.med.check.db.api.user;
 
+import com.med.check.db.dto.response.DoctorAllResponse;
+import com.med.check.db.dto.response.DoctorByIdResponse;
+import com.med.check.db.dto.response.DoctorResponse;
 import com.med.check.db.dto.response.DoctorReviewResponse;
 import com.med.check.db.service.DoctorService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -25,6 +26,27 @@ public class DoctorApi {
     @PreAuthorize("hasAuthority('PATIENT')")
     public List<DoctorReviewResponse> getDoctorsByReview(){
         return doctorService.getDoctorsByReview();
+    }
+
+    @GetMapping("/get-all-doctors")
+    @Operation(summary = "Get doctors method",
+            description = "This method gets all doctors from database!")
+    public List<DoctorAllResponse> getAllDoctors(){
+        return doctorService.getAllDoctors();
+    }
+
+    @GetMapping("/get-doctors-by-service/{id}")
+    @Operation(summary = "Get doctors by service id method",
+            description = "This method gets all doctors from database by service id!")
+    public List<DoctorResponse> getDoctorsByService(@PathVariable("id") Long service_id){
+        return doctorService.getDoctorsByServiceId(service_id);
+    }
+
+    @GetMapping("/get-doctor-by-id/{id}")
+    @Operation(summary = "Get doctor by id method",
+            description = "This method gets doctor from database by id!")
+    public DoctorByIdResponse getDoctorById(@PathVariable("id") Long doctor_id){
+        return doctorService.getDoctorById(doctor_id);
     }
 
 }

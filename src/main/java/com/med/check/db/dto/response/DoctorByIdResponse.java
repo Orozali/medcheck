@@ -10,6 +10,7 @@ public record DoctorByIdResponse(
         String surName,
         String service,
         String position,
-        String description
+        String description,
+        double grade
 ) {
 }

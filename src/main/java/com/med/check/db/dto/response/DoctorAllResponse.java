@@ -3,11 +3,11 @@ package com.med.check.db.dto.response;
 import lombok.Builder;
 
 @Builder
-public record DoctorResponse(
+public record DoctorAllResponse(
         Long doctor_id,
-        String name,
-        String surname,
         String image,
-        String positions
-) {
+        String name,
+        String surName,
+        String position
+){
 }

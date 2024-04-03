@@ -13,5 +13,5 @@ public class DoctorReviewResponse {
     private String name;
     private String surName;
     private String position;
-    private int grade;
+    private double grade;
 }
