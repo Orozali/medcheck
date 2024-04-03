@@ -1,14 +1,19 @@
 insert into service(id, name)
-values (10, 'Урология'),
-       (11, 'Аллергология'),
-       (12, 'Вакцинация'),
-       (13, 'Гинекология'),
-       (14, 'Кардиология'),
-       (14, 'Неврология'),
-       (15, 'Психтерапия'),
-       (16, 'Ревмотология'),
-       (17, 'Онкология'),
-       (18, 'Эндокринология');
+values (1, 'Аллергология'),
+       (2, 'Вакцинация'),
+       (3, 'Гинекология'),
+       (4, 'Кардиология'),
+       (5, 'Психтерапия'),
+       (6, 'Ревмотология'),
+       (7, 'Онкология'),
+       (8, 'Эндокринология'),
+       (9, 'Урология');
 
-insert into user_info(id, email, password, role)
-values (1,'ilyazovorozali08@gmail.com', '$2a$12$I7ndl4.c2xzC0y4230O7HeVOLj9EOtimk5Of6coEhgZpZKWaQWlHS','ADMIN');
+insert into user_info(id, email, password, reset_password_token, roles)
+VALUES (1,'ilyazovorozali08@gmail.com', '$2a$12$5OCLf1sLMM/GBmbo10JhOuXuofj/6gTxHjVSgqzxzaTox1hMlVCXu',null,'PATIENT'),
+       (2,'laborant@gmail.com', '$2a$12$iMk3UcI9VoECATqSIZhvq.ICHltA255I8ee9UuFJoe.2yNShDjaX.',null,'LABORANT'),
+       (3,'admin@gmail.com', '$2a$12$dlNOZ4QUKxi5f/YBySadxO9A/i6iSIj.ilCxVg7fq/UR53iyouQ7O',null,'ADMIN');
+
+
+
+

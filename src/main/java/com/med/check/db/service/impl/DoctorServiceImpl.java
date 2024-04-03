@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -82,11 +83,20 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public DoctorByIdResponse getDoctorById(Long doctorId) {
+        DecimalFormat df = new DecimalFormat("#.##");
         Doctor doctor = doctorRepository.findById(doctorId)
                 .orElseThrow(()->{
                     log.error("Doctor not found!");
                     return new NotFoundException("Doctor not found!");
                 });
+        List<Reviews> reviews = doctor.getReviews();
+        double count = 0;
+        for(Reviews review: reviews){
+            count+=review.getGrade();
+        }
+        if(!reviews.isEmpty()){
+            count = count/reviews.size();
+        }
         return DoctorByIdResponse.builder()
                 .id(doctor.getId())
                 .name(doctor.getFirstName())
@@ -95,6 +105,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .description(doctor.getDescription())
                 .position(doctor.getPosition())
                 .service(doctor.getService().getName())
+                .grade(Double.parseDouble(df.format(count)))
                 .build();
     }
 
@@ -126,21 +137,23 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     public List<DoctorResponse> getDoctorsByServiceId(Long serviceId) {
         String sql = "select d.id as doctor_id, d.first_name as name, " +
-                "d.last_name as surName, d.image as image from doctors d where service_id = ?";
+                "d.last_name as surName, d.image as image, d.position as positions from doctors d where service_id = ?";
         return jdbcTemplate.query(sql, (resultSet, i) -> new DoctorResponse(
                 resultSet.getLong("doctor_id"),
                 resultSet.getString("name"),
                 resultSet.getString("surName"),
-                resultSet.getString("image")
+                resultSet.getString("image"),
+                resultSet.getString("positions")
         ), serviceId);
     }
 
     @Override
     public List<DoctorReviewResponse> getDoctorsByReview() {
+        DecimalFormat df = new DecimalFormat("#.##");
         List<DoctorReviewResponse> response = new ArrayList<>();
         List<Doctor> doctors = doctorRepository.findAll();
         for(Doctor doctor: doctors){
-            int count = 0;
+            double count = 0;
             List<Reviews> reviews = doctor.getReviews();
             DoctorReviewResponse doctorReviewResponse = new DoctorReviewResponse();
             for(Reviews review: reviews){
@@ -154,11 +167,27 @@ public class DoctorServiceImpl implements DoctorService {
             doctorReviewResponse.setSurName(doctor.getLastName());
             doctorReviewResponse.setPosition(doctor.getPosition());
             doctorReviewResponse.setImage(doctor.getImage());
-            doctorReviewResponse.setGrade(count);
+            doctorReviewResponse.setGrade(Double.parseDouble(df.format(count)));
             response.add(doctorReviewResponse);
         }
-        response.sort(Comparator.comparingInt(DoctorReviewResponse::getGrade).reversed());
+        response.sort(Comparator.comparingDouble(DoctorReviewResponse::getGrade).reversed());
         return response;
+    }
+
+    @Override
+    public List<DoctorAllResponse> getAllDoctors() {
+        List<DoctorAllResponse> responses = new ArrayList<>();
+        doctorRepository.findAll().forEach( doctor -> {
+            var response = DoctorAllResponse.builder()
+                    .doctor_id(doctor.getId())
+                    .image(doctor.getImage())
+                    .name(doctor.getFirstName())
+                    .surName(doctor.getLastName())
+                    .position(doctor.getPosition())
+                    .build();
+            responses.add(response);
+        });
+        return responses;
     }
 }
 

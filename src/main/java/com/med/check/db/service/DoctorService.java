@@ -18,4 +18,6 @@ public interface DoctorService {
     List<DoctorResponse> getDoctorsByServiceId(Long serviceId);
 
     List<DoctorReviewResponse> getDoctorsByReview();
+
+    List<DoctorAllResponse> getAllDoctors();
 }
