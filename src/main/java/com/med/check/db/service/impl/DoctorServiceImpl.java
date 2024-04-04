@@ -1,14 +1,19 @@
 package com.med.check.db.service.impl;
 
 import com.med.check.db.dto.request.AddDoctorRequest;
+import com.med.check.db.dto.request.DoctorEditRequest;
+import com.med.check.db.dto.request.DoctorImageRequest;
 import com.med.check.db.dto.response.*;
 import com.med.check.db.exception.exceptions.NotFoundException;
 import com.med.check.db.model.Doctor;
+import com.med.check.db.model.ImageData;
 import com.med.check.db.model.Reviews;
 import com.med.check.db.model.Schedule;
 import com.med.check.db.repository.DoctorRepository;
 import com.med.check.db.repository.ServiceRepository;
+import com.med.check.db.repository.StorageRepository;
 import com.med.check.db.service.DoctorService;
+import com.med.check.db.utils.ImageUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,11 +21,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,10 +37,10 @@ public class DoctorServiceImpl implements DoctorService {
 
     private final DoctorRepository doctorRepository;
     private final ServiceRepository serviceRepository;
-    private final JdbcTemplate jdbcTemplate;
+    private final StorageRepository storageRepository;
 
     @Override
-    public SimpleResponse addDoctor(AddDoctorRequest request) {
+    public SimpleResponse addDoctor(DoctorImageRequest request) throws IOException {
         com.med.check.db.model.Service service = serviceRepository.findByName(request.service())
                 .orElseThrow(()->{
                     log.error("Service not found!");
@@ -46,8 +53,16 @@ public class DoctorServiceImpl implements DoctorService {
                 .lastName(request.surname())
                 .position((request.position()))
                 .isActive(true)
-                .image(request.image())
                 .build();
+        if(request.image() != null){
+            ImageData image = storageRepository.save(ImageData.builder()
+                    .type(request.image().getContentType())
+                    .name(request.image().getOriginalFilename())
+                    .imageData(request.image().getBytes())
+                    .build());
+            doctor.setImage(image);
+        }
+
         service.addDoctor(doctor);
         doctorRepository.save(doctor);
         log.info("Новый специялист успешно добавлен!");
@@ -71,7 +86,7 @@ public class DoctorServiceImpl implements DoctorService {
                     .isActive(doctor.getIsActive())
                     .name(doctor.getFirstName())
                     .surName(doctor.getLastName())
-                    .image(doctor.getImage())
+                    .image(ImageUtils.getBase64Image(doctor.getImage()))
                     .position(doctor.getPosition())
                     .service(doctor.getService().getName())
                     .schedule_to(time)
@@ -82,7 +97,7 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public DoctorByIdResponse getDoctorById(Long doctorId) {
+    public DoctorByIdResponse getDoctorById(Long doctorId){
         DecimalFormat df = new DecimalFormat("#.##");
         Doctor doctor = doctorRepository.findById(doctorId)
                 .orElseThrow(()->{
@@ -101,7 +116,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .id(doctor.getId())
                 .name(doctor.getFirstName())
                 .surName(doctor.getLastName())
-                .image(doctor.getImage())
+                .image(ImageUtils.getBase64Image(doctor.getImage()))
                 .description(doctor.getDescription())
                 .position(doctor.getPosition())
                 .service(doctor.getService().getName())
@@ -110,7 +125,7 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public SimpleResponse editDoctorById(DoctorByIdResponse request) {
+    public SimpleResponse editDoctorById(DoctorEditRequest request) throws IOException {
         Doctor doctor = doctorRepository.findById(request.id())
                 .orElseThrow(()->{
                     log.error("Doctor not found!");
@@ -121,12 +136,26 @@ public class DoctorServiceImpl implements DoctorService {
                     log.error("Service not found!");
                     return new NotFoundException("Service not found!");
                 } );
+        if(request.image() != null){
+            ImageData image = storageRepository.save(ImageData.builder()
+                    .name(request.image().getOriginalFilename())
+                    .type(request.image().getContentType())
+                    .imageData(request.image().getBytes())
+                    .build());
+
+            doctor.setFirstName(request.name());
+            doctor.setLastName(request.surName());
+            doctor.setService(service);
+            doctor.setDescription(request.description());
+            doctor.setPosition(request.position());
+            doctor.setImage(image);
+        }
         doctor.setFirstName(request.name());
         doctor.setLastName(request.surName());
         doctor.setService(service);
         doctor.setDescription(request.description());
         doctor.setPosition(request.position());
-        doctor.setImage(request.image());
+
         log.info("Cпециялист успешно обновлен!");
         return SimpleResponse.builder()
                 .httpStatus(HttpStatus.OK)
@@ -136,15 +165,22 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public List<DoctorResponse> getDoctorsByServiceId(Long serviceId) {
-        String sql = "select d.id as doctor_id, d.first_name as name, " +
-                "d.last_name as surName, d.image as image, d.position as positions from doctors d where service_id = ?";
-        return jdbcTemplate.query(sql, (resultSet, i) -> new DoctorResponse(
-                resultSet.getLong("doctor_id"),
-                resultSet.getString("name"),
-                resultSet.getString("surName"),
-                resultSet.getString("image"),
-                resultSet.getString("positions")
-        ), serviceId);
+
+        com.med.check.db.model.Service service = serviceRepository.findById(serviceId)
+                .orElseThrow(() ->new NotFoundException("Service Not Found"));
+
+            List<DoctorResponse> result = new ArrayList<>();
+            service.getDoctors().forEach(doctor -> {
+                var response = DoctorResponse.builder()
+                        .doctor_id(doctor.getId())
+                        .positions(doctor.getPosition())
+                        .name(doctor.getFirstName())
+                        .surname(doctor.getLastName())
+                        .image(ImageUtils.getBase64Image(doctor.getImage()))
+                        .build();
+                result.add(response);
+            });
+            return result;
     }
 
     @Override
@@ -166,7 +202,7 @@ public class DoctorServiceImpl implements DoctorService {
             doctorReviewResponse.setName(doctor.getFirstName());
             doctorReviewResponse.setSurName(doctor.getLastName());
             doctorReviewResponse.setPosition(doctor.getPosition());
-            doctorReviewResponse.setImage(doctor.getImage());
+            doctorReviewResponse.setImage(ImageUtils.getBase64Image(doctor.getImage()));
             doctorReviewResponse.setGrade(Double.parseDouble(df.format(count)));
             response.add(doctorReviewResponse);
         }
@@ -180,7 +216,7 @@ public class DoctorServiceImpl implements DoctorService {
         doctorRepository.findAll().forEach( doctor -> {
             var response = DoctorAllResponse.builder()
                     .doctor_id(doctor.getId())
-                    .image(doctor.getImage())
+                    .image(ImageUtils.getBase64Image(doctor.getImage()))
                     .name(doctor.getFirstName())
                     .surName(doctor.getLastName())
                     .position(doctor.getPosition())
@@ -190,5 +226,3 @@ public class DoctorServiceImpl implements DoctorService {
         return responses;
     }
 }
-
-

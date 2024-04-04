@@ -13,6 +13,7 @@ import com.med.check.db.repository.PatientRepository;
 import com.med.check.db.repository.ReviewsRepository;
 import com.med.check.db.repository.UserInfoRepository;
 import com.med.check.db.service.ReviewsService;
+import com.med.check.db.utils.ImageUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +45,7 @@ public class ReviewsServiceImpl implements ReviewsService {
         List<ReviewsResponse> reviewsResponses = new ArrayList<>();
         reviewsRepository.findAll().forEach( reviews -> {
             var response = ReviewsResponse.builder()
-                    .patient_image(reviews.getPatient().getImage())
+                    .patient_image(ImageUtils.getBase64Image(reviews.getPatient().getImage()))
                     .name(reviews.getPatient().getFirstName())
                     .grade(reviews.getGrade())
                     .comment(reviews.getComment())

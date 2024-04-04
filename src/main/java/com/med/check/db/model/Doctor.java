@@ -23,11 +23,13 @@ public class Doctor {
     private Long id;
     private String firstName;
     private String lastName;
-    @Column(length = 10000)
-    private String image;
     private String position;
+    @Column(length = 10000)
     private String description;
     private Boolean isActive;
+    @OneToOne
+    @JoinColumn(name = "image_id")
+    private ImageData image;
     @OneToMany(mappedBy = "doctor", orphanRemoval = true)
     private List<Appointments> appointments;
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "doctor",orphanRemoval = true)

@@ -1,12 +1,13 @@
 package com.med.check.db.api;
 
-import com.med.check.db.dto.request.AuthenticateRequest;
-import com.med.check.db.dto.request.ForgetPasswordRequest;
-import com.med.check.db.dto.request.RegisterRequest;
-import com.med.check.db.dto.request.ResetPasswordRequest;
+import com.med.check.db.config.jwt.JwtService;
+import com.med.check.db.dto.request.*;
 import com.med.check.db.dto.response.AuthenticationResponse;
+import com.med.check.db.dto.response.JwtResponseDTO;
 import com.med.check.db.dto.response.SimpleResponse;
+import com.med.check.db.model.RefreshToken;
 import com.med.check.db.service.AuthenticationService;
+import com.med.check.db.service.RefreshTokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 public class AuthenticationApi {
 
     private final AuthenticationService authenticationService;
+    private final RefreshTokenService refreshTokenService;
+    private final JwtService jwtService;
 
     @Operation(summary = "Sign up method", description = "This method takes users information and registers!")
     @PostMapping("/sign-up")
@@ -50,5 +53,18 @@ public class AuthenticationApi {
     @PostMapping("/reset-password")
     public AuthenticationResponse resetPassword(@RequestParam String email, @RequestBody @Valid ResetPasswordRequest request){
         return authenticationService.resetPassword(request.newPassword(), email);
+    }
+
+    @PostMapping("/refreshToken")
+    public JwtResponseDTO refreshToken(@RequestBody RefreshTokenRequestDTO refreshTokenRequestDTO){
+        return refreshTokenService.findByToken(refreshTokenRequestDTO.token())
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUserInfo)
+                .map(userInfo -> {
+                    String accessToken = jwtService.generateToken(userInfo);
+                    return JwtResponseDTO.builder()
+                            .accessToken(accessToken)
+                            .refreshToken(refreshTokenRequestDTO.token()).build();
+                }).orElseThrow(() ->new RuntimeException("Refresh Token is not in DB..!!"));
     }
 }
