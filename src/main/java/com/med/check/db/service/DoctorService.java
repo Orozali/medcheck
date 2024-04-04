@@ -1,19 +1,22 @@
 package com.med.check.db.service;
 
 import com.med.check.db.dto.request.AddDoctorRequest;
+import com.med.check.db.dto.request.DoctorEditRequest;
+import com.med.check.db.dto.request.DoctorImageRequest;
 import com.med.check.db.dto.response.*;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface DoctorService {
 
-    SimpleResponse addDoctor(AddDoctorRequest request);
+    SimpleResponse addDoctor(DoctorImageRequest request) throws IOException;
 
     List<GetDoctorsResponse> getDoctors();
 
-    DoctorByIdResponse getDoctorById(Long doctorId);
+    DoctorByIdResponse getDoctorById(Long doctorId) throws IOException;
 
-    SimpleResponse editDoctorById(DoctorByIdResponse request);
+    SimpleResponse editDoctorById(DoctorEditRequest request) throws IOException;
 
     List<DoctorResponse> getDoctorsByServiceId(Long serviceId);
 

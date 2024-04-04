@@ -23,8 +23,9 @@ public class Patient {
     private String firstName;
     private String lastName;
     private String telNumber;
-    @Column(length = 1000000)
-    private String image;
+    @OneToOne
+    @JoinColumn(name = "image_id")
+    private ImageData image;
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "user_id")
     private User user;

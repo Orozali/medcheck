@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -45,7 +46,7 @@ public class DoctorApi {
     @GetMapping("/get-doctor-by-id/{id}")
     @Operation(summary = "Get doctor by id method",
             description = "This method gets doctor from database by id!")
-    public DoctorByIdResponse getDoctorById(@PathVariable("id") Long doctor_id){
+    public DoctorByIdResponse getDoctorById(@PathVariable("id") Long doctor_id) throws IOException {
         return doctorService.getDoctorById(doctor_id);
     }
 

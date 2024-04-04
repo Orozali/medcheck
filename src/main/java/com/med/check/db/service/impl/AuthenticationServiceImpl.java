@@ -11,11 +11,13 @@ import com.med.check.db.exception.exceptions.BadRequestException;
 import com.med.check.db.exception.exceptions.MessageSendingException;
 import com.med.check.db.exception.exceptions.NotFoundException;
 import com.med.check.db.model.Patient;
+import com.med.check.db.model.RefreshToken;
 import com.med.check.db.model.User;
 import com.med.check.db.model.enums.Role;
 import com.med.check.db.repository.UserInfoRepository;
 import com.med.check.db.repository.PatientRepository;
 import com.med.check.db.service.AuthenticationService;
+import com.med.check.db.service.RefreshTokenService;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -54,6 +56,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JavaMailSender javaMailSender;
     private final Configuration config;
     private final MessageSource messageSource;
+    private final RefreshTokenService refreshTokenService;
 
     private static final int TOKEN_LENGTH = 6;
     private static final String DIGIT_CHARACTERS = "0123456789";
@@ -89,7 +92,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return AuthenticationResponse.builder()
                 .email(info.getEmail())
                 .roles(info.getRoles())
-                .token(jwtToken)
+                .accessToken(jwtToken)
+                .refreshToken(refreshTokenService.createRefreshToken(info.getUsername()))
                 .build();
     }
 
@@ -115,8 +119,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         );
         log.info(String.format("Пользователь %s успешно аутентифицирован", user.getEmail()));
         String token = jwtService.generateToken(user);
+        String refreshToken = refreshTokenService.createRefreshToken(user.getUsername());
         return AuthenticationResponse.builder()
-                .token(token)
+                .accessToken(token)
+                .refreshToken(refreshToken)
                 .roles(user.getRoles())
                 .email(user.getEmail())
                 .build();
@@ -189,7 +195,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         log.info("Пароль пользователя успешно изменен!");
         return AuthenticationResponse.builder()
                 .email(user.getEmail())
-                .token(jwtService.generateToken(user))
+                .accessToken(jwtService.generateToken(user))
+                .refreshToken(refreshTokenService.createRefreshToken(user.getUsername()))
                 .roles(user.getRoles())
                 .build();
     }

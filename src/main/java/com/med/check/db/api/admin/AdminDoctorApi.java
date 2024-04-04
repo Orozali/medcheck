@@ -1,6 +1,7 @@
 package com.med.check.db.api.admin;
 
-import com.med.check.db.dto.request.AddDoctorRequest;
+import com.med.check.db.dto.request.DoctorEditRequest;
+import com.med.check.db.dto.request.DoctorImageRequest;
 import com.med.check.db.dto.response.DoctorByIdResponse;
 import com.med.check.db.dto.response.GetDoctorsResponse;
 import com.med.check.db.dto.response.SimpleResponse;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -26,7 +28,7 @@ public class AdminDoctorApi {
 
     @PostMapping("/add-doctor")
     @Operation(summary = "Add doctor method", description = "This method adds doctor to database!")
-    public SimpleResponse addDoctor(@RequestBody @Valid AddDoctorRequest request){
+    public SimpleResponse addDoctor(@ModelAttribute @Valid DoctorImageRequest request) throws IOException {
         return doctorService.addDoctor(request);
     }
 
@@ -38,13 +40,13 @@ public class AdminDoctorApi {
 
     @GetMapping("/get-doctor-by-id/{doctor_id}")
     @Operation(summary = "Get doctor method", description = "This method gets one doctor by ID!")
-    public DoctorByIdResponse getDoctor(@PathVariable("doctor_id") Long doctor_id) {
+    public DoctorByIdResponse getDoctor(@PathVariable("doctor_id") Long doctor_id) throws IOException {
         return doctorService.getDoctorById(doctor_id);
     }
 
     @PostMapping("/edit")
     @Operation(summary = "Edit doctor method", description = "This method edits one doctor!")
-    public SimpleResponse editDoctor(@RequestBody DoctorByIdResponse request) {
+    public SimpleResponse editDoctor(@ModelAttribute @Valid DoctorEditRequest request) throws IOException {
         return doctorService.editDoctorById(request);
     }
 
